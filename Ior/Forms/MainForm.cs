@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Drawing;
@@ -194,6 +194,8 @@ namespace Swensen.Ior.Forms
             snapshots = new HistoryList<RequestResponseSnapshot>(Settings.Default.MaxSnapshots);
 
             updateSSLValidationHandler();
+
+            this.initSuiteFolder(); // @Yorn
         }
 
         private void updateSSLValidationHandler() {
@@ -837,5 +839,143 @@ namespace Swensen.Ior.Forms
             resetLogStats();
             showLogViewer();
         }
+
+
+
+        // -------- File Tree View @Yorn -------- begin
+        private void suiteSaveMenuItem_Click(object sender, EventArgs e) {
+            if (this.fileTreeView.SelectedNode == null) {
+                MessageBox.Show("Please select the destination to save");
+                return;
+            }
+            string userSelected = this.fileTreeView.SelectedNode.FullPath;
+            this.saveRequestToSuite(userSelected);
+        }
+
+        private void suiteOpenMenuItem_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog dialog = new FolderBrowserDialog();
+            if (dialog.ShowDialog() != DialogResult.OK)
+                return;
+            
+            this.reloadFileTree(this.fileTreeView, dialog.SelectedPath);
+            this.fileTreeView.ExpandAll();
+            Settings.Default.SuiteFolder = dialog.SelectedPath;
+            Settings.Default.Save();
+        }
+
+        private void fileTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            TreeNode node = e.Node;
+            //if (node.Name == "" || !node.Name.Contains("／")) return;
+            if (!node.Text.Contains("\u2215")) return;
+
+            Console.WriteLine("----file----" + node.FullPath);
+            this.openRequestFile(node.FullPath);
+        }
+
+        // -----
+        private void initSuiteFolder()
+        {
+            string dir = Settings.Default.SuiteFolder;
+            if (dir == "" || !Directory.Exists(dir))
+                return;
+            this.reloadFileTree(this.fileTreeView, dir);
+        }
+
+        private void reloadFileTree(TreeView treeView, string projectDir)
+        {
+            try
+            {
+                treeView.Nodes.Clear();
+                TreeNode rootNode = new TreeNode(projectDir);
+                rootNode.Tag = projectDir;
+                rootNode.Text = projectDir;
+                treeView.Nodes.Add(rootNode);
+
+                DirectoryInfo info = new DirectoryInfo(projectDir);
+                DirectoryInfo[] dirs = info.GetDirectories();
+
+                for (int i = 0; i < dirs.Count(); i++)
+                {
+                    rootNode.Nodes.Add(dirs[i].Name);
+                    string subNodePath = projectDir + "\\" + dirs[i].Name;
+                    getNode(rootNode.Nodes[i], subNodePath);
+
+                }
+                getFile(rootNode, projectDir);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("ERROR:" + e.Message);
+            }
+        }
+
+        private void getNode(TreeNode treeNode, string path)
+        {
+            if (!Directory.Exists(path)) return;
+
+            DirectoryInfo info = new DirectoryInfo(path);
+            DirectoryInfo[] dirs = info.GetDirectories();
+
+            for (int i = 0; i < dirs.Count(); i++)
+            {
+                treeNode.Nodes.Add(dirs[i].Name);
+                string subNodePath = path + "\\" + dirs[i].Name;
+                getNode(treeNode.Nodes[i], subNodePath);
+            }
+            getFile(treeNode, path);
+        }
+
+        private void getFile(TreeNode treeNode, string path)
+        {
+            if (!Directory.Exists(path)) return;
+
+            DirectoryInfo info = new DirectoryInfo(path);
+
+            foreach (FileInfo file in info.GetFiles())
+            {
+                //Console.WriteLine(file.FullName);
+                string ext = file.Extension;
+                if (ext == "" || ext == ".ior" || ext == ".txt")
+                    treeNode.Nodes.Add(ext, file.Name);
+            }
+
+        }
+
+
+        private void saveRequestToSuite(string path)
+        {
+            bool isFile = true;
+            if (File.Exists(path)) {
+                isFile = true;
+            } else if (Directory.Exists(path)) {
+                isFile = false;
+            } else {
+                MessageBox.Show("Please select a suite folder or a file");
+                return;
+            }
+
+            string fileFullName = path;
+
+            var requestVm = buildRequestViewModel();
+
+            if (!isFile)
+            {
+                string url = requestVm.Url;
+                string method = requestVm.Method;
+                string p = url.Replace("://", "?").Split('?')[1];
+                p = p.Substring(p.IndexOf('/'));
+                p = p.Replace('/', '\u2215');
+                string fn = method + "：" + p;
+                fileFullName += "\\" + fn;
+            }
+
+            requestVm.Save(fileFullName);
+            this.isLastOpenedRequestFileDirty = false;
+            if (!isFile) this.getFile(this.fileTreeView.SelectedNode, path); // refresh current node
+        }
+
+        // -------- File Tree View @Yorn -------- end
     }
 }
