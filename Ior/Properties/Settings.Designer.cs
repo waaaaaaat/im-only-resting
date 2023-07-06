@@ -226,5 +226,19 @@ namespace Swensen.Ior.Properties {
                 this["EnableAutomaticContentDecompression"] = value;
             }
         }
+
+        // add
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SuiteFolder {
+            get {
+                return ((string)(this["SuiteFolder"]));
+            }
+            set {
+                this["SuiteFolder"] = value;
+            }
+        }
+
     }
 }
