@@ -1,4 +1,4 @@
-﻿namespace Swensen.Ior.Forms
+namespace Swensen.Ior.Forms
 {
     partial class MainForm
     {
@@ -28,6 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
+            // -------- File Tree View @Yorn -------- begin
+            this.fileTreeView = new System.Windows.Forms.TreeView();
+            this.fileTreeView.Dock = System.Windows.Forms.DockStyle.Left;
+            this.fileTreeView.Location = new System.Drawing.Point(0, 0);
+            this.fileTreeView.Margin = new System.Windows.Forms.Padding(6);
+            this.fileTreeView.ItemHeight = 20;
+            this.fileTreeView.Name = "fileTreeView";
+            this.fileTreeView.Size = new System.Drawing.Size(480, 800);
+            this.fileTreeView.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.fileTreeView.TabIndex = 1;
+            this.suiteSaveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.suiteOpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            // -------- File Tree View @Yorn -------- end
             this.splitterMain = new System.Windows.Forms.SplitContainer();
             this.grpRequest = new System.Windows.Forms.GroupBox();
             this.grpBody = new System.Windows.Forms.GroupBox();
@@ -758,11 +771,31 @@
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.logViewerToolStripMenuItem,
+            this.suiteOpenMenuItem,  // @Yorn -start
+            this.suiteSaveMenuItem,  // @Yorn -end
             this.toolStripMenuItem2,
             this.settingsToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(82, 38);
             this.toolsToolStripMenuItem.Text = "&Tools";
+
+            // @Yorn -start  suiteSaveToolStripMenuItem
+            this.suiteSaveMenuItem.Name = "suiteSaveToolStripMenuItem";
+            this.suiteSaveMenuItem.Size = new System.Drawing.Size(233, 38);
+            this.suiteSaveMenuItem.Text = "Save to Suite";
+            this.suiteSaveMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+            | System.Windows.Forms.Keys.S)));
+            this.suiteSaveMenuItem.Click += new System.EventHandler(this.suiteSaveMenuItem_Click);
+
+            this.suiteOpenMenuItem.Name = "suiteOpenToolStripMenuItem";
+            this.suiteOpenMenuItem.Size = new System.Drawing.Size(233, 38);
+            this.suiteOpenMenuItem.Text = "Open Suite";
+            this.suiteOpenMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+            | System.Windows.Forms.Keys.O)));
+            this.suiteOpenMenuItem.Click += new System.EventHandler(this.suiteOpenMenuItem_Click);
+            this.fileTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.fileTreeView_NodeMouseClick);
+            // @Yorn -end ----
+
             // 
             // logViewerToolStripMenuItem
             // 
@@ -931,6 +964,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1452, 1008);
             this.Controls.Add(this.splitterMain);
+            this.Controls.Add(this.fileTreeView); // @Yorn
             this.Controls.Add(this.mainMenuStrip);
             this.Controls.Add(this.mainStatusStrip);
             this.MainMenuStrip = this.mainMenuStrip;
@@ -982,6 +1016,9 @@
         }
 
         #endregion
+        private System.Windows.Forms.TreeView fileTreeView; // @Yorn -begin
+        private System.Windows.Forms.ToolStripMenuItem suiteOpenMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem suiteSaveMenuItem; // @Yorn -end
 
         private System.Windows.Forms.SplitContainer splitterMain;
         private System.Windows.Forms.GroupBox grpRequest;
